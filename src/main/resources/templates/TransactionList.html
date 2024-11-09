@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <title>FinSight - Transaction History</title>
+  <script src="https://kit.fontawesome.com/0faddc1af8.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+  <style>
+    /* Optional: Style adjustments for better appearance */
+    .nav-link {
+      color: white !important;
+    }
+    .nav-link:hover {
+      color: #f8f9fa !important;
+    }
+    .export-btn {
+      display: flex;
+      justify-content: center; /* Center the button horizontally */
+      margin-top: 20px; /* Space above the button */
+      margin-bottom: 20px; /* Space below the button */
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light bg-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand text-white" href="#">FinSight</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link active text-white" aria-current="page" href="/">Home</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link text-white" href="/transactionhistory">Transaction History</a>
+        </li>
+      </ul>
+      <div>
+        <a class="nav-link text-white" href="/transaction_register">New Transaction</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div class="container my-5 col-md-8">
+  <h2 class="text-center">Transaction History</h2>
+  <table class="table table-striped table-hover" id="transactionTable">
+    <thead>
+    <tr>
+      <th scope="col">Id</th>
+      <th scope="col">Transaction Type</th>
+      <th scope="col">Category</th>
+      <th scope="col">Note</th>
+      <th scope="col">Price</th>
+      <th scope="col">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="b : ${transaction}">
+      <td th:text="${b.id}"></td>
+      <td th:text="${b.transactionType}"></td>
+      <td>
+        <span th:if="${b.transactionType == 'expense'}" th:text="${b.category}"></span>
+        <span th:if="${b.transactionType == 'income'}" th:text="${b.incomeCategory}"></span>
+      </td>
+      <td th:text="${b.note}"></td>
+      <td th:text="${b.price}"></td>
+      <td>
+        <a style="color:blue" th:href="@{/editTransaction/{id}(id=${b.id})}">
+          <i class="fa-solid fa-pen-to-square ms-4"></i>
+        </a>
+        <a style="color:red" th:href="@{/deleteTransaction/{id}(id=${b.id})}">
+          <i class="fa-solid fa-trash ms-4"></i>
+        </a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+
+  <div class="export-btn">
+    <button class="btn btn-dark" id="exportToPDF">Export to PDF</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.getElementById('exportToPDF').addEventListener('click', function () {
+    // Import jsPDF
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    // Add title to the PDF
+    doc.setFontSize(18);
+    doc.text("Transaction History", 14, 22);
+
+    // Define columns and rows
+    const columns = ["Id", "Transaction Type", "Category", "Note", "Price"];
+    const rows = [];
+
+    // Loop through each row of the table and push data to rows array
+    document.querySelectorAll('table tbody tr').forEach(tr => {
+      const row = [];
+      tr.querySelectorAll('td').forEach(td => {
+        row.push(td.textContent);
+      });
+      rows.push(row);
+    });
+
+    // Auto-table for table data
+    doc.autoTable({
+      head: [columns],
+      body: rows,
+      startY: 30, // Starting point for table to render
+      theme: 'grid',
+    });
+
+    // Save the PDF
+    doc.save('Transaction_History.pdf');
+  });
+</script>
+
+</body>
+</html>

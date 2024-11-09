@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>FinSight</title>
+    <style>
+        /* Center the chart container */
+        #chartContainer {
+            display: flex;
+            justify-content: center; /* Center the chart horizontally */
+            align-items: center;
+            flex-direction: column;
+            min-height: 80vh;
+            padding: 2rem;
+        }
+        #myPieChart {
+            width: 75vw; /* Adjust width as needed */
+            height: auto; /* Maintain aspect ratio */
+            max-width: 500px; /* Maximum width */
+            max-height: 500px; /* Maximum height */
+        }
+        h1 {
+            margin-bottom: 1.5rem;
+            font-size: 2rem;
+            text-align: center;
+            color: #333;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white" href="#">FinSight</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent" aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link active text-white" aria-current="page" href="/">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="transactionhistory">Transaction History</a>
+                </li>
+            </ul>
+            <div>
+                <a class="nav-link text-white" href="transaction_register">New Transaction</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div id="chartContainer" class="container">
+    <h1>Income vs Expense</h1>
+    <canvas id="myPieChart"></canvas>
+</div>
+
+<script>
+    fetch('/api/financial-data/pie-data')
+        .then(response => response.json())
+        .then(data => {
+            const ctx = document.getElementById('myPieChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(data),
+                    datasets: [{
+                        data: Object.values(data),
+                        backgroundColor: ['#4DB6AC', '#2A3D66'],
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+        });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
